@@ -111,11 +111,8 @@ US state associated with the synthetic member.
 
 Example:
 
-CA
-TX
-NY
-FL
-IL
+CA, TX, NY, FL, IL
+
 3.5 plan_type
 
 Synthetic insurance plan category.
@@ -237,6 +234,7 @@ specialty	VARCHAR		Associated specialty
 Example:
 
 SRV-000001
+
 5.2 service_category
 
 Example values:
@@ -252,7 +250,7 @@ Pharmacy
 Surgery
 5.3 service_name
 
-Example:
+Example values:
 
 Primary Care Visit
 MRI Scan
@@ -260,7 +258,7 @@ Emergency Department Visit
 Specialist Consultation
 5.4 service_type
 
-Example:
+Example values:
 
 Professional
 Outpatient
@@ -371,8 +369,6 @@ A claim may contain multiple claim lines.
 Example:
 
 Claim CLM-000001
-
-
     ├── Line 1
     ├── Line 2
     └── Line 3
@@ -464,26 +460,12 @@ Service Utilization	claims / services
 
 The following grain rules must be followed:
 
-Claims
-
-One row = one unique claim.
-
-Claim Lines
-
-One row = one service line within a claim.
-
-Members
-
-One row = one member.
-
-Providers
-
-One row = one provider.
-
-Services
-
-One row = one service definition.
-
+Entity	Grain
+Claims	One row = one unique claim
+Claim Lines	One row = one service line within a claim
+Members	One row = one member
+Providers	One row = one provider
+Services	One row = one service definition
 16. Synthetic Data Principles
 
 All data must be:
