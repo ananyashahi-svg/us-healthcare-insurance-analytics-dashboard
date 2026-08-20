@@ -1,470 +1,213 @@
-# Functional Requirements Specification (FRS)
+# Functional Requirements
 
 ## US Healthcare Insurance Analytics Dashboard
 
 **Document Version:** 1.0  
 **Status:** Draft  
-**Product:** US Healthcare Insurance Analytics Dashboard  
-**Data Classification:** Synthetic / Portfolio-Safe  
+**Data Classification:** Synthetic / Portfolio-Safe
 
 ---
 
 # 1. Purpose
 
-This Functional Requirements Specification defines the detailed functional behavior of the US Healthcare Insurance Analytics Dashboard.
+This document translates the business and product requirements into detailed functional requirements for the US Healthcare Insurance Analytics Dashboard.
 
-The document translates the Business Requirements Document (BRD) and Product Requirements Document (PRD) into testable functional requirements.
-
-Each requirement defines:
-
-- Functional behavior
-- User interaction
-- Expected system response
-- Business rules
-- Acceptance criteria
-- Priority
+Each requirement describes expected system behavior and provides acceptance criteria that can be used for development, testing, and UAT.
 
 ---
 
 # 2. Functional Requirement Structure
 
-Each functional requirement follows:
+Each requirement contains:
+
+- Requirement ID
+- Feature
+- Description
+- Business Rule
+- Acceptance Criteria
+- Priority
+
+---
+
+# 3. Executive Dashboard
+
+## FR-001 — Display Total Claims
+
+### Description
+
+The system shall display the total number of unique claims within the selected analytical context.
+
+### Business Rule
 
 ```text
-Requirement
-    ↓
-User Action
-    ↓
-System Behavior
-    ↓
-Expected Result
-    ↓
+Total Claims = COUNT(DISTINCT Claim ID)
 Acceptance Criteria
-3. Dashboard Access
-FR-001 — Dashboard Landing
-Requirement
+KPI displays on the Executive Dashboard.
+Each Claim ID is counted once.
+Applying valid filters recalculates the KPI.
+KPI matches the validated SQL result.
+Null Claim IDs are excluded or flagged according to data-quality rules.
+Priority
 
-The system shall display the Executive Overview when an authorized user opens the dashboard.
+Must Have
 
-User Action
+FR-002 — Display Total Claim Amount
+Description
 
-User opens the dashboard.
+The system shall display the total submitted/billed Claim Amount.
 
-System Behavior
-
-The system loads the default dashboard view.
-
-Expected Result
-
-The user can immediately view the primary healthcare insurance KPIs.
-
-Acceptance Criteria
-Executive Overview loads successfully.
-KPI cards are displayed.
-Default filters are applied.
-No KPI displays a blank value when valid data exists.
-Dashboard displays the selected reporting period.
-
-Priority: Must Have
-
-4. Executive KPI Requirements
-FR-002 — Display Total Claims
-Requirement
-
-The system shall display Total Claims as the number of unique claims within the selected filter context.
-
-Calculation
-COUNT(DISTINCT Claim ID)
-Acceptance Criteria
-Total Claims is displayed as a KPI card.
-The value changes when applicable filters change.
-Duplicate Claim IDs are not double-counted.
-KPI reconciles with SQL validation.
-
-Priority: Must Have
-
-FR-003 — Display Total Claim Amount
-Requirement
-
-The system shall display the total Claim Amount for the selected analytical population.
-
-Calculation
-SUM(Claim Amount)
-Acceptance Criteria
-Total Claim Amount is displayed.
-Financial formatting is applied.
-Value responds to applicable filters.
-Value reconciles with SQL.
-
-Priority: Must Have
-
-FR-004 — Display Total Allowed Amount
-Requirement
-
-The system shall display Total Allowed Amount.
-
-Calculation
-SUM(Allowed Amount)
-Acceptance Criteria
-Total Allowed Amount is displayed.
-Allowed Amount is not confused with Claim Amount.
-KPI responds to applicable filters.
-KPI reconciles with SQL.
-
-Priority: Must Have
-
-FR-005 — Display Total Paid Amount
-Requirement
-
-The system shall display Total Paid Amount for the selected analytical population.
-
-Calculation
-SUM(Paid Amount)
-Acceptance Criteria
-Paid Amount is displayed separately.
-Paid Amount does not exceed Allowed Amount for valid records.
-KPI responds to applicable filters.
-
-Priority: Must Have
-
-FR-006 — Display Total Spend
-Requirement
-
-The system shall display Total Spend according to the approved Spend definition.
-
-Calculation
-SUM(Spend Amount)
 Business Rule
+Total Claim Amount = SUM(Claim Amount)
+Acceptance Criteria
+KPI displays the aggregated Claim Amount.
+KPI responds to applicable filters.
+Financial formatting is applied.
+KPI reconciles with SQL.
+Priority
 
-For the MVP:
+Must Have
 
+FR-003 — Display Total Allowed Amount
+Description
+
+The system shall display the total Allowed Amount independently from Claim Amount.
+
+Business Rule
+Total Allowed Amount = SUM(Allowed Amount)
+Acceptance Criteria
+Allowed Amount is displayed separately.
+Claim Amount is not used as a substitute.
+KPI responds to filters.
+Result reconciles with SQL.
+Priority
+
+Must Have
+
+FR-004 — Display Total Spend
+Description
+
+The system shall display Total Spend based on the approved project definition.
+
+Business Rule
 Spend Amount = Paid Amount
 Acceptance Criteria
-Spend KPI is displayed.
-Spend definition is documented.
+Total Spend is calculated from Spend Amount.
+Spend does not use Claim Amount by default.
+Spend responds to dashboard filters.
 Spend reconciles with SQL.
-Spend responds to applicable filters.
+Priority
 
-Priority: Must Have
+Must Have
 
-FR-007 — Display Unique Members
-Requirement
+4. Claims Analytics
+FR-005 — Claims Trend
+Description
 
-The system shall display the number of unique members represented in the selected analytical population.
-
-Calculation
-COUNT(DISTINCT Member ID)
-Acceptance Criteria
-Duplicate Member IDs are counted once.
-KPI responds to filters.
-KPI reconciles with SQL.
-
-Priority: Must Have
-
-FR-008 — Display Claims per Member
-Requirement
-
-The system shall calculate and display Claims per Member.
-
-Calculation
-Total Claims / Unique Members
-Acceptance Criteria
-Calculation uses filtered values.
-Division-by-zero conditions are handled.
-Result is displayed with appropriate decimal precision.
-
-Priority: Must Have
-
-FR-009 — Display Spend per Member
-Requirement
-
-The system shall calculate and display Spend per Member.
-
-Calculation
-Total Spend / Unique Members
-Acceptance Criteria
-Calculation uses filtered values.
-Division by zero is handled.
-Result is displayed using appropriate currency formatting.
-
-Priority: Must Have
-
-5. Date & Time Requirements
-FR-010 — Date Filter
-Requirement
-
-Users shall be able to filter dashboard analytics by date or date range.
-
-Supported Options
-Custom date range
-Month
-Quarter
-Year
-Acceptance Criteria
-User can select a valid date range.
-All applicable KPIs update.
-Charts update consistently.
-Selected date range is visible to the user.
-
-Priority: Must Have
-
-FR-011 — Default Date Range
-Requirement
-
-The dashboard shall load using a defined default reporting period.
-
-Default
-
-The initial MVP may use the complete available synthetic dataset period.
+The system shall display claims volume over time.
 
 Acceptance Criteria
-Default period is clearly displayed.
-Users can change the period.
-All dashboard components respect the selected period.
 
-Priority: Must Have
+Users can:
 
-6. Global Filtering
-FR-012 — Provider Filter
+View claims by month.
+Apply a date range.
+Identify increases and decreases.
+Hover/select a period to view the associated value.
+Priority
 
-Users shall be able to filter analytics by Provider.
+Must Have
 
-Acceptance Criteria
-Provider list is populated from valid provider records.
-Selecting a provider updates relevant KPIs.
-Clearing the filter restores the previous population.
+FR-006 — Claim Status Distribution
+Description
 
-Priority: Must Have
+The system shall display claims by processing status.
 
-FR-013 — Service Category Filter
-
-Users shall be able to filter analytics by Service Category.
-
-Acceptance Criteria
-Service categories are selectable.
-Relevant KPIs and charts update.
-Filter state is visible.
-
-Priority: Must Have
-
-FR-014 — Claim Status Filter
-
-Users shall be able to filter claims by:
-
+Supported Statuses
 Paid
 Denied
 Pending
 Adjusted
 Acceptance Criteria
-User can select one or more statuses.
-Claims KPIs update.
-Financial KPIs follow documented status behavior.
+Each supported status is represented.
+Users can see claim counts.
+Users can see percentages where applicable.
+Status filters affect related dashboard components.
+Priority
 
-Priority: Must Have
+Must Have
 
-FR-015 — Geography Filter
+FR-007 — Denial Rate
+Description
 
-Users should be able to filter analytics by available geographic dimensions.
+The system shall calculate the percentage of claims with Denied status.
 
-Examples:
-
-State
-Region
-
-Priority: Should Have
-
-FR-016 — Reset Filters
-
-The system shall provide a Reset Filters action.
-
-Acceptance Criteria
-
-Selecting Reset Filters:
-
-Clears user-applied filters.
-Restores default date range.
-Restores default dashboard state.
-Recalculates KPIs.
-
-Priority: Must Have
-# 7. Claims Analytics Requirements
-
-## FR-017 — Claims Trend
-
-### Requirement
-
-The system shall display the trend of unique claims over time.
-
-### Visualization
-
-Line chart.
-
-### Default Granularity
-
-Month.
-
-### Acceptance Criteria
-
-- Claims are grouped correctly by reporting period.
-- Duplicate Claim IDs are not double-counted.
-- Trend responds to dashboard filters.
-- User can identify increases and decreases over time.
-
-**Priority:** Must Have
-
----
-
-## FR-018 — Claim Status Distribution
-
-### Requirement
-
-The system shall display the distribution of claims by status.
-
-### Supported Statuses
-
-- Paid
-- Denied
-- Pending
-- Adjusted
-
-### Visualization
-
-Bar chart or donut chart.
-
-### Acceptance Criteria
-
-- Each status is represented correctly.
-- Status counts reconcile with SQL.
-- Selecting a status filters applicable dashboard components.
-
-**Priority:** Must Have
-
----
-
-## FR-019 — Denial Rate
-
-### Requirement
-
-The system shall calculate the percentage of claims with a Denied status.
-
-### Calculation
-
-```text
+Formula
+Denial Rate =
 Denied Claims / Total Claims × 100
 Acceptance Criteria
 Denied claims are correctly identified.
-Denominator follows the documented KPI definition.
+Denominator uses the documented claim population.
 Result is displayed as a percentage.
-Result responds to applicable filters.
+Result is validated against SQL.
+Priority
 
-Priority: Must Have
+Must Have
 
-FR-020 — Claims by Service
-Requirement
+5. Financial Analytics
+FR-008 — Claim Amount vs Allowed Amount
+Description
 
-The system shall display claim volume by Service Category.
-
-Visualization
-
-Horizontal bar chart.
+The system shall provide a comparison between Claim Amount and Allowed Amount.
 
 Acceptance Criteria
-Service categories are correctly grouped.
-Claims are calculated at unique Claim ID level.
-Results respond to filters.
-User can identify the highest-volume services.
 
-Priority: Must Have
+Users can:
 
-8. Financial Analytics Requirements
-FR-021 — Spend Trend
-Requirement
+View both metrics together.
+Compare them across time.
+Compare them by service.
+Compare them by provider.
+Priority
 
-The system shall display Total Spend over time.
+Must Have
 
-Visualization
+FR-009 — Average Claim Amount
+Description
 
-Line chart.
+The system shall calculate the average Claim Amount per unique claim.
 
+Formula
+Average Claim Amount =
+Total Claim Amount / Total Claims
 Acceptance Criteria
-Spend is grouped by reporting period.
-Spend uses the approved Spend Amount definition.
-Trend responds to filters.
-Values reconcile with SQL.
+Calculation uses unique claims.
+KPI responds to filters.
+Result is validated against SQL.
+Priority
 
-Priority: Must Have
+Must Have
 
-FR-022 — Claim Amount vs Allowed Amount
-Requirement
+FR-010 — Average Allowed Amount
+Description
 
-The system shall provide a visual comparison between Claim Amount and Allowed Amount.
+The system shall calculate the average Allowed Amount per unique claim.
 
-Visualization
-
-Clustered bar chart or comparison KPI.
-
+Formula
+Average Allowed Amount =
+Total Allowed Amount / Total Claims
 Acceptance Criteria
-Claim Amount and Allowed Amount are clearly labeled.
-Metrics are not combined into a single value.
-User can compare values by time or service.
-Values reconcile with SQL.
+Calculation uses unique claims.
+KPI responds to filters.
+Result reconciles with SQL.
+Priority
 
-Priority: Must Have
+Must Have
 
-FR-023 — Spend by Service
-Requirement
+6. Provider Analytics
+FR-011 — Provider Ranking
+Description
 
-The system shall rank Service Categories by Total Spend.
-
-Visualization
-
-Horizontal ranked bar chart.
-
-Acceptance Criteria
-Services are ordered by Spend.
-Highest-spend services are clearly identifiable.
-Filtering updates the ranking.
-
-Priority: Must Have
-
-FR-024 — Spend by Provider
-Requirement
-
-The system shall rank providers by Total Spend.
-
-Visualization
-
-Horizontal ranked bar chart or table.
-
-Acceptance Criteria
-Providers are ranked from highest to lowest spend.
-Provider names/IDs are displayed.
-Results respond to filters.
-User can select a provider for further analysis.
-
-Priority: Must Have
-
-FR-025 — Spend by Geography
-Requirement
-
-The system should display Total Spend by available geographic dimensions.
-
-Visualization
-
-Bar chart or geographic visualization.
-
-Acceptance Criteria
-Geographic values are correctly grouped.
-Spend reconciles with SQL.
-Filters update the visualization.
-
-Priority: Should Have
-
-9. Provider Analytics Requirements
-FR-026 — Provider Ranking
-Requirement
-
-The system shall rank providers using selected performance metrics.
+The system shall allow providers to be ranked by selected performance metrics.
 
 Supported Metrics
 Claims
@@ -473,109 +216,192 @@ Allowed Amount
 Average Allowed Amount
 Utilization
 Acceptance Criteria
+Providers are displayed in ranked order.
 User can select the metric.
-Providers are ranked correctly.
-Ranking responds to filters.
-Ranking uses documented KPI definitions.
+Ranking updates based on active filters.
+Provider IDs remain unique.
+Priority
 
-Priority: Must Have
+Must Have
 
-FR-027 — Provider Detail
-Requirement
-
-The system shall provide a detailed view for a selected provider.
-
-Provider Detail Should Include
-Provider ID
-Provider Name
-Provider Specialty
-Network Status
-Claims
-Claim Amount
-Allowed Amount
-Paid Amount
-Spend
-Average Allowed Amount
-Utilization
-Acceptance Criteria
-Selecting a provider opens or filters to the provider detail.
-All displayed KPIs correspond to the selected provider.
-Provider data reconciles with SQL.
-
-Priority: Must Have
-
-FR-028 — Provider Comparison
-Requirement
+FR-012 — Provider Comparison
+Description
 
 The system shall allow users to compare selected providers.
 
 Comparison Metrics
 Claims
-Claim Amount
-Allowed Amount
 Spend
+Allowed Amount
 Average Allowed Amount
-Claims per Member where applicable
+Utilization
 Acceptance Criteria
 At least two providers can be compared.
-Metrics use identical calculation rules.
-Comparison remains within the selected filter context.
+Metrics use the same analytical context.
+Comparison responds to filters.
+Missing values are clearly represented.
+Priority
 
-Priority: Must Have
+Must Have
 
-10. Utilization Requirements
-FR-029 — Claims per Member
-Requirement
+FR-013 — Provider Drilldown
+Description
 
-The system shall display Claims per Member.
+Users shall be able to select a provider and investigate provider-level performance.
+
+Drilldown Information
+Provider
+Specialty
+Claims
+Claim Amount
+Allowed Amount
+Paid Amount
+Spend
+Services
+Utilization
+Geography
+Acceptance Criteria
+Selecting a provider opens the provider detail view.
+Provider-specific KPIs are recalculated.
+User can return to the previous dashboard state.
+Priority
+
+Must Have
+
+7. Utilization Analytics
+FR-014 — Claims per Member
+Description
+
+The system shall calculate the average number of claims per unique member.
 
 Formula
-COUNT(DISTINCT Claim ID)
-/
-COUNT(DISTINCT Member ID)
+Claims per Member =
+Total Claims / Unique Members
 Acceptance Criteria
-Unique claims are used.
-Unique members are used.
-Division-by-zero is handled.
-Result responds to filters.
+Unique members are counted using Member ID.
+Claims are counted using unique Claim IDs.
+KPI responds to filters.
+Division by zero is prevented.
+Priority
 
-Priority: Must Have
+Must Have
 
-FR-030 — Service Utilization
-Requirement
+FR-015 — Spend per Member
+Description
 
-The system shall display utilization by Service Category.
+The system shall calculate average Spend per unique member.
 
-Example Measure
-Number of Claims by Service Category
+Formula
+Spend per Member =
+Total Spend / Unique Members
 Acceptance Criteria
-Services are grouped correctly.
-Claims are counted at the appropriate grain.
-User can identify high-frequency services.
+Unique Member ID is used.
+Spend uses the approved Spend definition.
+KPI responds to filters.
+Division by zero is handled.
+Priority
 
-Priority: Must Have
+Must Have
 
-FR-031 — Utilization Trend
-Requirement
+FR-016 — Service Utilization
+Description
 
-The system should display utilization trends over time.
-
-Visualization
-
-Line chart.
+The system shall display healthcare service volume by service category.
 
 Acceptance Criteria
-Monthly utilization is calculated consistently.
-Trend responds to filters.
-SQL validation is available.
+Service categories are grouped consistently.
+Users can sort by utilization.
+Filters update results.
+Null or unknown service categories are handled.
+Priority
 
-Priority: Should Have
+Must Have
 
-11. Drilldown Requirements
-FR-032 — KPI Drilldown
-Requirement
+8. Dashboard Filtering
+FR-017 — Date Filter
+Description
 
-Users shall be able to drill from an aggregate KPI to underlying dimensions.
+Users shall be able to filter the dashboard by date or date range.
+
+Acceptance Criteria
+Valid dates can be selected.
+All applicable visuals respond to the selected period.
+The active date range is visible.
+Reset returns to the default period.
+Priority
+
+Must Have
+
+FR-018 — Provider Filter
+Description
+
+Users shall be able to filter analytics by provider.
+
+Acceptance Criteria
+Users can select one or more providers.
+Applicable dashboard components update.
+The active provider filter is visible.
+Priority
+
+Must Have
+
+FR-019 — Service Filter
+Description
+
+Users shall be able to filter analytics by service category.
+
+Acceptance Criteria
+Users can select one or more service categories.
+Applicable dashboard components update.
+The active service filter is visible.
+Priority
+
+Must Have
+
+FR-020 — Claim Status Filter
+Description
+
+Users shall be able to filter claims by processing status.
+
+Acceptance Criteria
+Users can select supported claim statuses.
+Applicable dashboard components update.
+The selected status is visible.
+Priority
+
+Must Have
+
+FR-021 — Geographic Filter
+Description
+
+Users shall be able to filter analytics by supported geographic dimensions.
+
+Acceptance Criteria
+Users can select supported geographic values.
+Applicable dashboard components update.
+The active geographic filter is visible.
+Priority
+
+Should Have
+
+FR-022 — Filter Reset
+Description
+
+The system shall provide a clear mechanism to remove active filters.
+
+Acceptance Criteria
+All filters return to default values.
+KPI values return to the default dashboard state.
+No stale filters remain active.
+Priority
+
+Must Have
+
+9. Drilldown & Detail
+FR-023 — KPI Drilldown
+Description
+
+Users shall be able to drill from summary metrics into supporting dimensions.
 
 Example
 Total Spend
@@ -586,186 +412,177 @@ Provider
     ↓
 Claim
 Acceptance Criteria
-Drilldown retains relevant filters.
-Values remain consistent between levels.
+Drilldown preserves the selected analytical context.
+User can identify the selected dimension.
 User can return to the previous level.
+Priority
 
-Priority: Must Have
+Must Have
 
-FR-033 — Provider Drilldown
-Requirement
+FR-024 — Claim Detail
+Description
 
-Users shall be able to select a provider from a ranking or visualization and investigate provider-level details.
+The system shall provide claim-level details.
 
+Fields
+Claim ID
+Member ID
+Provider ID
+Service Date
+Service Category
+Claim Amount
+Allowed Amount
+Paid Amount
+Spend Amount
+Claim Status
 Acceptance Criteria
-Provider selection applies the appropriate filter.
-Provider KPIs update.
-Provider-related charts update.
-User can return to the provider ranking.
-
-Priority: Must Have
-
-FR-034 — Claim-Level Detail
-Requirement
-
-The system shall provide claim-level details for investigation.
-
-Required Fields
-Field	Required
-Claim ID	Yes
-Member ID	Yes
-Provider ID	Yes
-Service Date	Yes
-Service Category	Yes
-Claim Amount	Yes
-Allowed Amount	Yes
-Paid Amount	Yes
-Claim Status	Yes
-Acceptance Criteria
-Claim records reflect the selected filters.
-Claim IDs are unique at claim grain.
+Each record displays the correct Claim ID.
 Financial values reconcile with the source dataset.
+Filters remain applicable.
+Duplicate claim display is prevented where claim-level grain is required.
+Priority
 
-Priority: Must Have
+Must Have
 
-12. Data Validation Requirements
-FR-035 — Duplicate Claim Validation
+10. Data Quality
+FR-025 — Duplicate Claim Detection
+Description
 
-The system's analytical process shall identify duplicate Claim IDs.
+The analytical process shall identify duplicate Claim IDs.
 
-Expected Result
+Acceptance Criteria
+Duplicate IDs can be detected using SQL.
+Duplicate records are flagged.
+Duplicate records are not silently removed without documentation.
+Priority
 
-Duplicate records are flagged for investigation.
+Must Have
 
-Priority: Must Have
+FR-026 — Missing Reference Detection
+Description
 
-FR-036 — Missing Member Validation
+The system shall identify claims referencing unavailable:
 
-The system shall identify claims containing missing or unmatched Member IDs.
+Member IDs
+Provider IDs
+Service IDs
+Acceptance Criteria
+Claims with unmatched Member IDs are identified.
+Claims with unmatched Provider IDs are identified.
+Claims with unmatched Service IDs are identified.
+Exceptions are recorded for investigation.
+Priority
 
-Priority: Must Have
+Must Have
 
-FR-037 — Missing Provider Validation
+FR-027 — Financial Validation
+Description
 
-The system shall identify claims containing missing or unmatched Provider IDs.
+The system shall identify violations of defined financial rules.
 
-Priority: Must Have
-
-FR-038 — Financial Validation
-
-The system shall identify financial records that violate documented rules.
-
-Checks
+Validation Rules
 Allowed Amount <= Claim Amount
 Paid Amount <= Allowed Amount
 Member Responsibility <= Allowed Amount
 Paid Amount + Member Responsibility = Allowed Amount
 Spend Amount = Paid Amount
+Acceptance Criteria
+Each financial rule is evaluated using SQL.
+Violating records are identified.
+Exception counts are reported.
+Valid records are not incorrectly flagged.
+Priority
 
-Priority: Must Have
+Must Have
 
-FR-039 — Date Validation
+11. KPI Reconciliation
+FR-028 — SQL Reconciliation
+Description
 
-The analytical process shall identify:
+Dashboard KPIs shall be independently validated using SQL.
 
-Missing service dates
-Invalid dates
-Dates outside the supported analytical period
+Acceptance Criteria
 
-Priority: Must Have
+For each core KPI:
 
-13. Dashboard Interaction Requirements
-FR-040 — Cross-Filtering
+Dashboard Value = SQL Value
 
-Selecting a value in a visualization should filter related dashboard components where supported.
+within any explicitly documented rounding tolerance.
+
+Core KPIs
+Total Claims
+Total Claim Amount
+Total Allowed Amount
+Total Paid Amount
+Total Spend
+Unique Members
+Claims per Member
+Spend per Member
+Denial Rate
+Priority
+
+Must Have
+
+12. Error & Empty-State Handling
+FR-029 — No Data State
+Description
+
+If filters return no records, the dashboard shall clearly communicate that no data is available for the selected criteria.
 
 Example
-
-Selecting:
-
-Service = Cardiology
-
-should update relevant:
-
-KPIs
-Trends
-Provider rankings
-Claim details
-
-Priority: Must Have
-
-FR-041 — Active Filter Display
-
-The dashboard shall display currently active filters.
-
-Example
-Date: Jan–Jun 2026
-Service: Cardiology
-Region: Northeast
-
-Priority: Should Have
-
-FR-042 — Filter Reset
-
-Users shall be able to return the dashboard to its default state.
-
-Priority: Must Have
-
-14. Error & Empty-State Requirements
-FR-043 — No Data State
-
-If a selected filter combination returns no records, the dashboard shall display a clear message.
-
-Example:
-
 No data available for the selected filters.
+Try adjusting the date range or other filters.
+Priority
 
-The dashboard should not display misleading zeros where the underlying population is empty.
+Should Have
 
-Priority: Must Have
+FR-030 — Invalid Filter Combination
+Description
 
-FR-044 — Invalid Data State
+If a filter combination produces no valid analytical records, the dashboard should display an appropriate empty state rather than misleading zero values.
 
-If a data-quality issue affects a KPI, the system should provide an appropriate indication or flag for investigation.
+Acceptance Criteria
+The dashboard clearly indicates that no records match the selected criteria.
+The system does not display misleading KPI values.
+Users are given guidance to adjust filters.
+Priority
 
-Priority: Should Have
+Should Have
 
-FR-045 — Calculation Failure
-
-If a KPI cannot be calculated because required data is unavailable, the dashboard should display an appropriate error or unavailable state rather than presenting an incorrect value.
-
-Priority: Must Have
-
-15. Functional Requirement Traceability
-FR ID	Requirement	BRD Link	PRD Feature
-FR-002	Total Claims	BR-01, BR-02	KPI Summary
-FR-003	Claim Amount	BR-02	Claims Analytics
-FR-004	Allowed Amount	BR-04	Cost Analytics
-FR-006	Total Spend	BR-03	Spend Analytics
-FR-008	Claims per Member	BR-06	Utilization
-FR-010	Date Filter	BR-08	Filtering
-FR-017	Claims Trend	BR-02	Claims Analytics
-FR-019	Denial Rate	BR-02	Claims Analytics
-FR-021	Spend Trend	BR-03	Spend Analytics
-FR-024	Spend by Provider	BR-05	Provider Analytics
-FR-026	Provider Ranking	BR-05	Provider Analytics
-FR-028	Provider Comparison	BR-05	Provider Analytics
-FR-032	KPI Drilldown	BR-09	Drilldown
-FR-034	Claim Detail	BR-02	Claims Analytics
-FR-035	Duplicate Validation	BR-12	Data Quality
-FR-038	Financial Validation	BR-11	Data Validation
-FR-040	Cross-Filtering	BR-08	Interactive Dashboard
-16. Functional Definition of Done
+13. Functional Requirement Traceability
+Functional Requirement	PRD Feature	Business Requirement
+FR-001	KPI Summary	BR-01
+FR-002	KPI Summary	BR-01
+FR-003	Allowed Amount	BR-04
+FR-004	Spend Analytics	BR-03
+FR-005	Claims Analytics	BR-02
+FR-006	Claim Status	BR-02
+FR-007	Denial Rate	BR-02
+FR-008	Claim vs Allowed	BR-04
+FR-009	Average Claim	BR-02
+FR-010	Average Allowed	BR-04
+FR-011	Provider Ranking	BR-05
+FR-012	Provider Comparison	BR-05
+FR-013	Provider Drilldown	BR-05
+FR-014	Claims per Member	BR-06
+FR-015	Spend per Member	BR-03
+FR-016	Service Utilization	BR-06
+FR-017–022	Filtering	BR-08
+FR-023	Drilldown	BR-09
+FR-024	Claim Detail	BR-09
+FR-025–027	Data Quality	BR-12
+FR-028	KPI Validation	BR-10 / BR-11
+FR-029–030	UX / Error Handling	BR-08
+14. Functional Definition of Done
 
 A functional requirement is considered complete when:
 
-Requirement is implemented.
-Business rule is correctly applied.
-Required data is available.
-Calculation is validated.
-UI behavior matches the requirement.
-Filters behave correctly.
-Edge cases are handled.
-QA test cases pass.
-UAT acceptance criteria are satisfied.
+Requirement behavior is implemented.
+Business rules are applied.
+Acceptance criteria pass.
+Relevant SQL validation is complete.
+Dashboard behavior is tested.
+Filter behavior is validated.
+Edge cases are addressed.
+UAT criteria are satisfied.
 Requirement traceability is maintained.
