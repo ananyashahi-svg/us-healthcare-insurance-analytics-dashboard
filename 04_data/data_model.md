@@ -13,7 +13,7 @@
 
 This document defines the logical and analytical data model for the US Healthcare Insurance Analytics Dashboard.
 
-The model is designed to support:
+The model supports:
 
 - Claims analytics
 - Financial analytics
@@ -31,7 +31,7 @@ The model is designed to support:
 - Dashboard reporting
 - Data-quality validation
 
-The model uses synthetic and portfolio-safe data only.
+All data used in this portfolio project is synthetic.
 
 No real patient, provider, payer, healthcare organization, or claims data is used.
 
@@ -40,8 +40,6 @@ No real patient, provider, payer, healthcare organization, or claims data is use
 ## 2. Modeling Approach
 
 The analytical model follows a simplified star-schema approach.
-
-The model contains two primary types of tables.
 
 ### Fact Tables
 
@@ -70,7 +68,7 @@ The central analytical table is:
 
 The fact table connects to the following dimensions:
 
-| Dimension | Primary Key | Foreign Key in Fact | Relationship |
+| Dimension | Primary Key | Foreign Key | Relationship |
 |---|---|---|---|
 | dim_member | member_id | member_id | 1-to-many |
 | dim_provider | provider_id | provider_id | 1-to-many |
@@ -78,7 +76,7 @@ The fact table connects to the following dimensions:
 | dim_date | date_key | date_key | 1-to-many |
 | dim_geography | geography_id | geography_id | 1-to-many |
 
-Claim-level records can also connect to:
+Claim-level records also connect to:
 
 `fact_claim_lines`
 
@@ -98,17 +96,7 @@ Relationship:
 
 One row represents one unique claim.
 
-This is the primary fact table for executive and financial analytics.
-
-### Key Measures
-
-The table contains:
-
-- Claim Amount
-- Allowed Amount
-- Member Responsibility
-- Paid Amount
-- Spend Amount
+This is the primary fact table for executive, financial, utilization, and claims analytics.
 
 ### Fields
 
@@ -131,8 +119,6 @@ The table contains:
 ---
 
 ## 5. Fact Claims Financial Logic
-
-The financial fields follow defined business rules.
 
 ### Claim Amount
 
@@ -166,7 +152,7 @@ Business rule:
 
 Represents the synthetic payer payment.
 
-Business rule for applicable paid claims:
+For applicable paid claims:
 
 `paid_amount = allowed_amount - member_responsibility`
 
@@ -180,7 +166,7 @@ For the MVP:
 
 `spend_amount = paid_amount`
 
-This definition is intentionally fixed to maintain consistency across SQL and dashboard calculations.
+This definition is fixed for consistency across SQL and dashboard calculations.
 
 ---
 
@@ -303,15 +289,6 @@ One row per synthetic service definition.
 - Pharmacy
 - Surgery
 
-### Example Services
-
-- Primary Care Visit
-- MRI Scan
-- Emergency Department Visit
-- Specialist Consultation
-- Laboratory Test
-- Surgical Procedure
-
 ---
 
 ## 9. Dim Date
@@ -340,7 +317,7 @@ One row per calendar date.
 
 ### Primary Analytical Date
 
-The dashboard will primarily use:
+The dashboard primarily uses:
 
 `service_date`
 
@@ -471,19 +448,13 @@ Examples:
 
 The primary relationships are:
 
-`fact_claims.member_id → dim_member.member_id`
-
-`fact_claims.provider_id → dim_provider.provider_id`
-
-`fact_claims.service_id → dim_service.service_id`
-
-`fact_claims.date_key → dim_date.date_key`
-
-`fact_claims.geography_id → dim_geography.geography_id`
-
-`fact_claim_lines.claim_id → fact_claims.claim_id`
-
-`fact_claim_lines.service_id → dim_service.service_id`
+- `fact_claims.member_id → dim_member.member_id`
+- `fact_claims.provider_id → dim_provider.provider_id`
+- `fact_claims.service_id → dim_service.service_id`
+- `fact_claims.date_key → dim_date.date_key`
+- `fact_claims.geography_id → dim_geography.geography_id`
+- `fact_claim_lines.claim_id → fact_claims.claim_id`
+- `fact_claim_lines.service_id → dim_service.service_id`
 
 ---
 
@@ -493,418 +464,493 @@ A star-schema-oriented model was selected because the primary use case is analyt
 
 ### Performance
 
-Common aggregations are straightforward.
+Common analytical aggregations can be performed directly against the fact table.
 
-Example:
+Examples:
 
-```sql
-SUM(spend_amount)
-COUNT(DISTINCT claim_id)
-Business Usability
+- Sum of Spend
+- Sum of Allowed Amount
+- Sum of Paid Amount
+- Count of Claims
+- Count of Unique Members
+
+### Business Usability
 
 Business users can analyze metrics using familiar dimensions:
 
-Provider
-Member
-Service
-Date
-Geography
-Plan Type
-KPI Consistency
+- Provider
+- Member
+- Service
+- Date
+- Geography
+- Plan Type
+
+### KPI Consistency
 
 Centralizing financial measures in the fact table reduces inconsistent metric calculations.
 
-Dashboard Compatibility
+### Dashboard Compatibility
 
-The model can be consumed by common BI tools such as:
+The model can be consumed by:
 
-Power BI
-Tableau
-Looker
-Excel Power Pivot
-16. Fact vs Dimension
-Fact Tables
+- Power BI
+- Tableau
+- Looker
+- Excel Power Pivot
+
+---
+
+## 16. Fact vs Dimension
+
+### Fact Tables
 
 Facts represent measurable business events.
 
-fact_claims
+#### fact_claims
 
 Measures:
 
-Claim Amount
-Allowed Amount
-Member Responsibility
-Paid Amount
-Spend Amount
+- Claim Amount
+- Allowed Amount
+- Member Responsibility
+- Paid Amount
+- Spend Amount
 
-fact_claim_lines
+#### fact_claim_lines
 
 Measures:
 
-Units
-Line Claim Amount
-Line Allowed Amount
-Line Paid Amount
-Dimension Tables
+- Units
+- Line Claim Amount
+- Line Allowed Amount
+- Line Paid Amount
+
+### Dimension Tables
 
 Dimensions describe the business context.
 
-dim_member
+#### dim_member
 
 Examples:
 
-Age
-Gender
-State
-Plan Type
+- Age
+- Gender
+- State
+- Plan Type
+- Member Status
 
-dim_provider
-
-Examples:
-
-Provider Type
-Specialty
-State
-Network Status
-
-dim_service
+#### dim_provider
 
 Examples:
 
-Service Category
-Service Type
-Specialty
+- Provider Type
+- Specialty
+- State
+- Network Status
+- Quality Score
 
-dim_date
-
-Examples:
-
-Month
-Quarter
-Year
-
-dim_geography
+#### dim_service
 
 Examples:
 
-State
-Region
-Market
-17. Grain Management
+- Service Category
+- Service Type
+- Specialty
+
+#### dim_date
+
+Examples:
+
+- Month
+- Quarter
+- Year
+- Week
+
+#### dim_geography
+
+Examples:
+
+- State
+- Region
+- Market
+
+---
+
+## 17. Grain Management
 
 Grain must be explicitly controlled before calculating KPIs.
 
-Claim Grain
+### Claim Grain
 
-1 row = 1 claim
-
-Primary source:
-
-fact_claims
-
-Claim-Line Grain
-
-1 row = 1 claim service line
+`1 row = 1 claim`
 
 Primary source:
 
-fact_claim_lines
+`fact_claims`
 
-Member Grain
+### Claim-Line Grain
 
-1 row = 1 member
-
-Primary source:
-
-dim_member
-
-Provider Grain
-
-1 row = 1 provider
+`1 row = 1 claim service line`
 
 Primary source:
 
-dim_provider
+`fact_claim_lines`
 
-Service Grain
+### Member Grain
 
-1 row = 1 service definition
+`1 row = 1 member`
 
 Primary source:
 
-dim_service
+`dim_member`
 
-18. Avoiding Double Counting
+### Provider Grain
+
+`1 row = 1 provider`
+
+Primary source:
+
+`dim_provider`
+
+### Service Grain
+
+`1 row = 1 service definition`
+
+Primary source:
+
+`dim_service`
+
+### Date Grain
+
+`1 row = 1 calendar date`
+
+Primary source:
+
+`dim_date`
+
+---
+
+## 18. Avoiding Double Counting
 
 A common analytical risk occurs when claim-level data is joined to claim-line data.
 
 Example:
 
-1 Claim → 3 Claim Lines
+`1 Claim → 3 Claim Lines`
 
-If the claim amount is joined to all three lines, the claim amount can appear three times.
+If the claim amount is joined to all three lines, the same financial amount may appear multiple times.
 
 Therefore:
 
-Claim-level financial KPIs must be calculated from fact_claims unless the analysis specifically requires claim-line data.
+> Claim-level financial KPIs must be calculated from `fact_claims` unless claim-line analysis is specifically required.
 
-For example:
+For claim-level counting:
 
-Correct claim count:
+`COUNT(DISTINCT claim_id)`
 
-COUNT(DISTINCT claim_id)
+should be used when querying claim-line data.
 
-Incorrect approach when using claim-line data:
+---
 
-COUNT(claim_id)
+## 19. KPI Mapping
 
-when multiple lines exist for the same claim.
+| KPI | Primary Source | Calculation |
+|---|---|---|
+| Total Claims | fact_claims | COUNT(DISTINCT claim_id) |
+| Claim Amount | fact_claims | SUM(claim_amount) |
+| Allowed Amount | fact_claims | SUM(allowed_amount) |
+| Paid Amount | fact_claims | SUM(paid_amount) |
+| Spend | fact_claims | SUM(spend_amount) |
+| Unique Members | fact_claims | COUNT(DISTINCT member_id) |
+| Claims per Member | fact_claims | Total Claims / Unique Members |
+| Spend per Member | fact_claims | Total Spend / Unique Members |
+| Average Claim Amount | fact_claims | Claim Amount / Total Claims |
+| Average Allowed Amount | fact_claims | Allowed Amount / Total Claims |
+| Denial Rate | fact_claims | Denied Claims / Total Claims |
+| Provider Claims | fact_claims | Claims grouped by provider |
+| Provider Spend | fact_claims | Spend grouped by provider |
+| Service Utilization | fact_claim_lines | SUM(units) |
+| Average Spend per Claim | fact_claims | Spend / Total Claims |
 
-19. KPI Mapping
-KPI	Primary Source	Calculation
-Total Claims	fact_claims	COUNT(DISTINCT claim_id)
-Claim Amount	fact_claims	SUM(claim_amount)
-Allowed Amount	fact_claims	SUM(allowed_amount)
-Paid Amount	fact_claims	SUM(paid_amount)
-Spend	fact_claims	SUM(spend_amount)
-Unique Members	fact_claims	COUNT(DISTINCT member_id)
-Claims per Member	fact_claims	Claims / Members
-Spend per Member	fact_claims	Spend / Members
-Average Claim Amount	fact_claims	Claim Amount / Claims
-Average Allowed Amount	fact_claims	Allowed Amount / Claims
-Denial Rate	fact_claims	Denied Claims / Total Claims
-Provider Claims	fact_claims	Claims grouped by provider
-Provider Spend	fact_claims	Spend grouped by provider
-Service Utilization	fact_claim_lines	SUM(units)
-Average Spend per Claim	fact_claims	Spend / Claims
-20. Core Financial Relationships
+---
 
-The simplified financial model uses:
+## 20. Core Financial Relationships
 
-Allowed Amount <= Claim Amount
+The simplified financial model follows these rules:
 
-and:
+`Allowed Amount <= Claim Amount`
 
-Member Responsibility <= Allowed Amount
+`Member Responsibility <= Allowed Amount`
 
-For paid claims:
+For applicable paid claims:
 
-Paid Amount = Allowed Amount - Member Responsibility
+`Paid Amount = Allowed Amount - Member Responsibility`
 
 For the MVP:
 
-Spend Amount = Paid Amount
+`Spend Amount = Paid Amount`
 
-These rules will be validated during synthetic data generation and SQL quality checks.
+These rules will be validated during synthetic data generation and SQL data-quality checks.
 
-21. Analytical Data Flow
+---
+
+## 21. Claims Status Logic
+
+The model supports the following synthetic claim statuses:
+
+| Claim Status | Analytical Meaning |
+|---|---|
+| Paid | Claim represented as paid |
+| Denied | Claim represented as denied |
+| Pending | Claim remains pending |
+| Adjusted | Claim contains an adjustment scenario |
+
+Status-specific financial treatment will be defined during synthetic data generation.
+
+---
+
+## 22. Analytical Data Flow
 
 The analytical flow is:
 
-Synthetic Source Data
+**Synthetic Source Data**
 
 ↓
 
-Data Validation
+**Data Validation**
 
 ↓
 
-Data Transformation
+**Data Transformation**
 
 ↓
 
-Dimension Tables
+**Dimension Tables**
 
 ↓
 
-Fact Tables
+**Fact Tables**
 
 ↓
 
-SQL Analytics
+**SQL Analytics**
 
 ↓
 
-Dashboard Dataset
+**Dashboard Dataset**
 
 ↓
 
-BI Dashboard
+**BI Dashboard**
 
-22. Data Quality Layer
+---
+
+## 23. Data Quality Layer
 
 Before analytical consumption, the following checks should be performed.
 
-Key Validation
-Primary-key uniqueness
-Foreign-key integrity
-Duplicate identifiers
-Missing identifiers
-Financial Validation
-Negative amounts
-Allowed Amount greater than Claim Amount
-Member Responsibility greater than Allowed Amount
-Paid Amount inconsistent with financial rules
-Date Validation
-Invalid dates
-Claim dates before enrollment
-Future service dates where not allowed
-Invalid date keys
-Business Validation
-Invalid claim statuses
-Invalid provider relationships
-Invalid service relationships
-Invalid plan types
-Invalid network statuses
-23. Data Lineage
+### Key Validation
+
+- Primary-key uniqueness
+- Foreign-key integrity
+- Duplicate identifiers
+- Missing identifiers
+
+### Financial Validation
+
+- Negative amounts
+- Allowed Amount greater than Claim Amount
+- Member Responsibility greater than Allowed Amount
+- Paid Amount inconsistent with financial rules
+- Spend Amount inconsistent with Paid Amount
+
+### Date Validation
+
+- Invalid dates
+- Claim dates before enrollment
+- Invalid date keys
+- Unexpected future service dates
+
+### Business Validation
+
+- Invalid claim statuses
+- Invalid provider relationships
+- Invalid service relationships
+- Invalid plan types
+- Invalid network statuses
+
+---
+
+## 24. Data Lineage
 
 The model supports the following analytical lineage:
 
-Business Requirement
+**Business Requirement**
 
 ↓
 
-KPI Definition
+**KPI Definition**
 
 ↓
 
-Source Field
+**Source Field**
 
 ↓
 
-Transformation Logic
+**Transformation Logic**
 
 ↓
 
-Fact / Dimension
+**Fact / Dimension**
 
 ↓
 
-SQL Query
+**SQL Query**
 
 ↓
 
-Dashboard Metric
+**Dashboard Metric**
 
-This ensures that every dashboard KPI can be traced back to a defined business field and calculation.
+This provides traceability from business requirements to final dashboard outputs.
 
-24. Slowly Changing Dimensions
+---
+
+## 25. Slowly Changing Dimensions
 
 The MVP does not require full Slowly Changing Dimension implementation.
 
-However, in a production environment, some dimension attributes may change over time.
+In production environments, some dimension attributes may change over time.
 
 Potential examples include:
 
-Provider network status
-Member plan
-Provider specialty
-Provider location
+- Provider network status
+- Member plan
+- Provider specialty
+- Provider location
 
 A future production implementation could use:
 
-SCD Type 2
+`SCD Type 2`
 
 to preserve historical versions of changing dimension records.
 
 SCD implementation is outside the MVP scope.
 
-25. Analytical Security Considerations
+---
 
-Because this is a healthcare insurance analytics use case, production implementations would require appropriate access controls.
+## 26. Analytical Security Considerations
+
+Because this project represents a healthcare insurance analytics environment, production implementations would require appropriate data-security controls.
 
 Potential controls include:
 
-Role-based access
-Least-privilege access
-Data masking
-Audit logging
-Encryption
-Environment separation
-PHI/PII controls
-Row-level security
+- Role-based access control
+- Least-privilege access
+- Data masking
+- Audit logging
+- Encryption
+- Environment separation
+- PHI and PII controls
+- Row-level security
 
-The portfolio dataset does not contain real PHI or PII.
+This portfolio implementation uses synthetic data and does not contain real PHI or PII.
 
-26. Portfolio Scope
-Included in MVP
-Claim-level fact
-Claim-line fact
-Member dimension
-Provider dimension
-Service dimension
-Date dimension
-Geography dimension
-Financial measures
-KPI mapping
-Data-quality rules
-Grain definitions
-Relationship definitions
-Data lineage
-Excluded from MVP
-Real payer adjudication engine
-Real EDI transactions
-Real PHI
-Real provider contracts
-Real benefit configuration
-Real payment processing
-Production healthcare integrations
-Production security implementation
-27. Future Extensions
+---
+
+## 27. Portfolio Scope
+
+### Included in MVP
+
+- Claim-level fact
+- Claim-line fact
+- Member dimension
+- Provider dimension
+- Service dimension
+- Date dimension
+- Geography dimension
+- Financial measures
+- KPI mapping
+- Grain definitions
+- Relationship definitions
+- Data-quality rules
+- Data lineage
+- Security considerations
+
+### Excluded from MVP
+
+- Real payer adjudication engine
+- Real EDI transactions
+- Real PHI
+- Real provider contracts
+- Real benefit configuration
+- Real payment processing
+- Production healthcare integrations
+- Production security implementation
+
+---
+
+## 28. Future Extensions
 
 Potential future additions include:
 
-Diagnosis category
-Synthetic procedure category
-CPT-like synthetic codes
-ICD-like synthetic codes
-Network tier
-Benefit plan
-Deductible status
-Copay
-Coinsurance
-Facility type
-Region
-Risk category
-Provider contract attributes
-Claim adjustment history
+- Diagnosis category
+- Synthetic procedure category
+- CPT-like synthetic codes
+- ICD-like synthetic codes
+- Network tier
+- Benefit plan
+- Deductible status
+- Copay
+- Coinsurance
+- Facility type
+- Region
+- Risk category
+- Provider contract attributes
+- Claim adjustment history
+- Claim payment history
+- Eligibility history
 
 These features are outside the initial MVP.
 
-28. Design Principles
+---
+
+## 29. Design Principles
 
 The data model follows these principles:
 
-Define the grain before calculating metrics.
-Separate measurable facts from descriptive dimensions.
-Centralize financial measures.
-Prevent claim and claim-line double counting.
-Maintain consistent KPI definitions.
-Preserve data lineage from requirement to dashboard.
-Validate financial and referential integrity.
-Keep synthetic data clearly separated from real healthcare data.
-Design the model for analytical scalability.
-Keep the MVP simple enough for portfolio demonstration.
-29. Final Analytical Traceability
+1. Define the grain before calculating metrics.
+2. Separate measurable facts from descriptive dimensions.
+3. Centralize financial measures.
+4. Prevent claim and claim-line double counting.
+5. Maintain consistent KPI definitions.
+6. Preserve data lineage from requirement to dashboard.
+7. Validate financial and referential integrity.
+8. Keep synthetic data clearly separated from real healthcare data.
+9. Design the model for analytical scalability.
+10. Keep the MVP simple enough for portfolio demonstration.
+
+---
+
+## 30. Final Analytical Traceability
 
 The complete product analytics chain is:
 
-Business Requirement
+**Business Requirement**
 
-→ KPI Definition
+→ **KPI Definition**
 
-→ Data Dictionary
+→ **Data Dictionary**
 
-→ Data Model
+→ **Data Model**
 
-→ Synthetic Dataset
+→ **Synthetic Dataset**
 
-→ SQL
+→ **SQL**
 
-→ Analytics
+→ **Analytics**
 
-→ Dashboard
+→ **Dashboard**
 
-→ Product Metrics
+→ **Product Metrics**
 
 This ensures consistency between the business, data, analytics, and product layers.
