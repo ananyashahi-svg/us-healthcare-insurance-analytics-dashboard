@@ -8,7 +8,7 @@
 
 ---
 
-# 1. Purpose
+## 1. Purpose
 
 This document defines the fields used in the synthetic US healthcare insurance analytics dataset.
 
@@ -28,7 +28,7 @@ No real patient, provider, payer, or healthcare organization data is used.
 
 ---
 
-# 2. Data Model Overview
+## 2. Data Model Overview
 
 The analytical model contains the following core entities:
 
@@ -67,24 +67,20 @@ enrollment_date	DATE		Synthetic enrollment date
 member_status	VARCHAR		Active/inactive member status
 3.1 member_id
 
-Example:
-
-MEM-000001
+Example: MEM-000001
 
 Unique identifier for the synthetic member.
 
 Rules:
 
-Must be unique.
-Cannot be null.
-Must follow the synthetic ID format.
+Must be unique
+Cannot be null
+Must follow the synthetic ID format
 3.2 member_age
 
 Age of the synthetic member at the reference period.
 
-Example:
-
-42
+Example: 42
 
 Rules:
 
@@ -109,7 +105,7 @@ No personally identifying information is represented.
 
 US state associated with the synthetic member.
 
-Example:
+Example values:
 
 CA, TX, NY, FL, IL
 
@@ -152,9 +148,7 @@ network_status	VARCHAR		In-network/out-of-network
 quality_score	DECIMAL		Synthetic provider performance score
 4.1 provider_id
 
-Example:
-
-PRV-000001
+Example: PRV-000001
 
 Unique synthetic provider identifier.
 
@@ -162,9 +156,7 @@ Unique synthetic provider identifier.
 
 Synthetic provider name.
 
-Example:
-
-Provider Group 001
+Example: Provider Group 001
 
 No real healthcare organization names will be used.
 
@@ -204,13 +196,9 @@ Out-of-Network
 
 Synthetic analytical score used for provider-performance demonstrations.
 
-Example:
+Example: 87.5
 
-87.5
-
-Range:
-
-0–100
+Range: 0–100
 
 This is an analytical portfolio metric, not a clinical quality rating.
 
@@ -231,9 +219,7 @@ service_type	VARCHAR		Inpatient/outpatient/professional
 specialty	VARCHAR		Associated specialty
 5.1 service_id
 
-Example:
-
-SRV-000001
+Example: SRV-000001
 
 5.2 service_category
 
@@ -291,9 +277,7 @@ place_of_service	VARCHAR		Simplified service location
 
 Amount submitted/billed by the provider.
 
-Example:
-
-500.00
+Example: $500.00
 
 Business definition:
 
@@ -321,7 +305,7 @@ Business rule:
 
 paid_amount = allowed_amount - member_responsibility
 
-For applicable paid claims.
+This relationship applies to claims represented as paid in the synthetic model.
 
 7.5 spend_amount
 
@@ -335,7 +319,7 @@ This definition is fixed for the MVP.
 
 8. Claim Status
 
-The synthetic dataset will use:
+The synthetic dataset will use the following statuses:
 
 Status	Description
 Paid	Claim represented as paid
@@ -362,28 +346,29 @@ line_allowed_amount	DECIMAL		Line-level allowed amount
 line_paid_amount	DECIMAL		Line-level paid amount
 10. Claim vs Claim Line Grain
 
-This distinction is critical.
+This distinction is critical for analytics.
 
 A claim may contain multiple claim lines.
 
 Example:
 
 Claim CLM-000001
+    │
     ├── Line 1
     ├── Line 2
     └── Line 3
 
-Therefore:
+Therefore, using:
 
 COUNT(claim_id)
 
 on the claim-line table can overcount claims.
 
-For claim-level KPIs:
+For claim-level KPIs, use:
 
 COUNT(DISTINCT claim_id)
 
-must be used when querying claim lines.
+when querying claim lines.
 
 11. Date Dimensions
 
@@ -398,11 +383,7 @@ service_date
 
 for healthcare utilization and financial trend analysis.
 
-Future versions may introduce a dedicated:
-
-dim_date
-
-table.
+A dedicated dim_date table may be introduced in a future version.
 
 12. Geography
 
@@ -425,21 +406,31 @@ A dedicated geography dimension may be introduced in a later version.
 The primary relationships are:
 
 members.member_id
+        │
         ↓
 claims.member_id
 
 
+
+
 providers.provider_id
+        │
         ↓
 claims.provider_id
 
 
+
+
 services.service_id
+        │
         ↓
 claims.service_id
 
 
+
+
 claims.claim_id
+        │
         ↓
 claim_lines.claim_id
 14. Core KPI Mapping
@@ -457,15 +448,15 @@ Provider Claims	claims
 Provider Spend	claims
 Service Utilization	claims / services
 15. Data Grain Rules
-
-The following grain rules must be followed:
-
 Entity	Grain
 Claims	One row = one unique claim
 Claim Lines	One row = one service line within a claim
 Members	One row = one member
 Providers	One row = one provider
 Services	One row = one service definition
+
+Maintaining the correct grain is critical to preventing KPI overcounting.
+
 16. Synthetic Data Principles
 
 All data must be:
@@ -531,3 +522,9 @@ Validation rule
 Downstream KPI impact
 
 This ensures consistency between the data layer, SQL, dashboard, and product requirements.
+
+Document Status
+
+Status: Approved for MVP Data Modeling
+
+Next Artifact: Data Model & Star Schema
